@@ -1,0 +1,19 @@
+---
+description: Git workflow - commit regularly and push at stopping points
+alwaysApply: true
+---
+
+# Git Commit & Push Workflow
+
+## When Working on This Project
+
+1. **Commit at regular intervals** – After completing logical units of work (a feature, a fix, a refactor). Use clear, descriptive commit messages.
+2. **Push at good stopping points** – When reaching natural break points (end of a feature, before switching context, or when wrapping up a session).
+3. **Before pushing** – Check for git conflicts. If there are conflicts to resolve (e.g., after `git pull` or when the remote has diverged), work through them first before pushing.
+
+## Conflict Handling
+
+If `git status` or `git pull` reports conflicts:
+- Resolve conflicts locally before attempting to push
+- Do not force-push to overwrite remote changes
+- After resolving, commit the merge/rebase, then push
