@@ -1,6 +1,8 @@
-# Todo++
+# Todo++ 🦦
 
-A practical, mobile-first todo app with subtasks, starring, and zero clutter.
+A practical, mobile-first todo app with subtasks, starring, and zero clutter — built on the otter philosophy: **stay organized, stay playful, hold hands so nothing drifts away.**
+
+Otters are nature's productivity experts. They use tools, they work together, and they never let go of what matters. Todo++ takes that to heart.
 
 ## Quick start
 
@@ -11,11 +13,17 @@ npm run dev
 
 Open **http://localhost:5173** in your browser (Vite will pick another port if 5173 is in use).
 
+## Core principles
+
+1. **Hold hands** — Like otters sleeping on water, your tasks stay linked. Subtasks are always connected to their parent so nothing floats away.
+2. **Use your tools** — Otters are one of the few animals that use tools. Todo++ gives you the right ones: starring, subtasks, inline editing. No bloat, no missing essentials.
+3. **Stay above water** — Otters float effortlessly. Your task list should too. Completed items sink to the bottom; starred items rise to the top.
+
 ## Features
 
 - **Add / edit / complete / delete tasks** — the basics, done well
 - **Subtasks** — expand any task to break it into steps. Progress shows as "3/8" on the parent. One level deep, no sprawl.
-- **Today star** — flag what matters right now. Starred tasks float to the top.
+- **Today star** — flag what matters right now. Starred tasks float to the top (just like otters).
 - **Clear completed** — one click to sweep done tasks away
 - **Inline editing** — expand a task and tap Edit, or click a subtask's text directly
 - **Dark mode** — toggle in the header, persisted across sessions
@@ -48,3 +56,7 @@ todo-plus-plus/
 ├── .gitignore
 └── README.md
 ```
+
+---
+
+*"When you feel like your tasks are drifting apart, remember: otters hold hands."*
