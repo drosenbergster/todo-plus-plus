@@ -103,7 +103,7 @@
     /* ── Add Form ── */
     .tagline {
       text-align: center; font-size: 0.8125rem; color: var(--text-muted);
-      opacity: 0.7; margin-bottom: 1.25rem; font-style: italic; letter-spacing: 0.01em;
+      opacity: 0.7; margin-bottom: 0.75rem; font-style: italic; letter-spacing: 0.01em;
     }
 
     .add-form { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
@@ -449,15 +449,14 @@
       </button>
     </header>
 
+    <p class="tagline">Stay organized, stay playful, hold hands so nothing drifts away.</p>
+
     <form class="add-form" id="addForm">
       <input type="text" id="taskInput" placeholder="What's next? 🦦" autocomplete="off" autofocus>
       <button type="submit" class="add-btn"><span>Add</span></button>
     </form>
 
-    <p class="tagline">Stay organized, stay playful, hold hands so nothing drifts away.</p>
-
     <div class="list-header" id="listHeader" style="display:none">
-      <h2>🦦</h2>
       <div class="list-actions">
         <span class="task-count" id="taskCount"></span>
         <button class="clear-btn" id="clearBtn" style="display:none">Clear done</button>
