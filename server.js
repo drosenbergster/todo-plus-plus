@@ -102,6 +102,54 @@ app.post('/api/calendar/add', async (req, res) => {
   }
 });
 
+app.delete('/api/calendar/:eventId', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    await runGws([
+      'calendar', 'events', 'delete',
+      '--params', JSON.stringify({ calendarId: 'primary', eventId }),
+    ]);
+    res.json({ ok: true });
+  } catch (err) {
+    const msg = err.message ?? String(err);
+    console.error('[calendar/delete]', msg);
+    res.json({ ok: false, error: 'unknown', message: msg });
+  }
+});
+
+app.patch('/api/calendar/:eventId', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { summary, start, end } = req.body;
+
+    const body = {};
+    if (summary !== undefined) body.summary = summary;
+    if (start !== undefined) body.start = start;
+    if (end !== undefined) body.end = end;
+
+    const data = await runGws([
+      'calendar', 'events', 'patch',
+      '--params', JSON.stringify({ calendarId: 'primary', eventId }),
+      '--json', JSON.stringify(body),
+    ]);
+
+    res.json({
+      ok: true,
+      event: {
+        id: data.id,
+        title: data.summary ?? '(No title)',
+        start: data.start?.dateTime ?? data.start?.date ?? null,
+        end: data.end?.dateTime ?? data.end?.date ?? null,
+        htmlLink: data.htmlLink ?? null,
+      },
+    });
+  } catch (err) {
+    const msg = err.message ?? String(err);
+    console.error('[calendar/update]', msg);
+    res.json({ ok: false, error: 'unknown', message: msg });
+  }
+});
+
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 app.listen(PORT, () => {

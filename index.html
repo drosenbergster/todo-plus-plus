@@ -489,6 +489,25 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
+    .cal-event-actions {
+      display: flex; align-items: center; gap: 0.125rem;
+      flex-shrink: 0; opacity: 0; transition: opacity 0.15s;
+    }
+    .cal-event:hover .cal-event-actions { opacity: 1; }
+    @media (hover: none) { .cal-event-actions { opacity: 0.6; } }
+    .cal-action-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; background: none; border: none;
+      cursor: pointer; border-radius: 6px; color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .cal-action-btn:hover { background: var(--accent-light); color: var(--accent); }
+    .cal-action-btn.danger:hover { background: var(--danger-bg); color: var(--danger); }
+    .cal-action-btn svg { width: 13px; height: 13px; }
+    .cal-event-title[contenteditable] {
+      outline: none; border-bottom: 2px solid var(--accent);
+      cursor: text;
+    }
     .cal-empty {
       font-size: 0.8125rem; color: var(--text-muted);
       font-style: italic; padding: 0.5rem 0.25rem;
@@ -1468,6 +1487,7 @@
           const title = document.createElement('div');
           title.className = 'cal-event-title';
           title.textContent = evt.title;
+          title.addEventListener('click', () => startEditEvent(evt, title));
           details.appendChild(title);
 
           if (evt.location) {
@@ -1477,8 +1497,27 @@
             details.appendChild(loc);
           }
 
+          const actions = document.createElement('div');
+          actions.className = 'cal-event-actions';
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'cal-action-btn';
+          editBtn.setAttribute('aria-label', 'Edit event');
+          editBtn.innerHTML = PENCIL_SVG;
+          editBtn.addEventListener('click', () => startEditEvent(evt, title));
+
+          const delBtn = document.createElement('button');
+          delBtn.className = 'cal-action-btn danger';
+          delBtn.setAttribute('aria-label', 'Delete event');
+          delBtn.innerHTML = X_SVG;
+          delBtn.addEventListener('click', () => deleteCalendarEvent(evt.id, card));
+
+          actions.appendChild(editBtn);
+          actions.appendChild(delBtn);
+
           card.appendChild(timeEl);
           card.appendChild(details);
+          card.appendChild(actions);
           group.appendChild(card);
         }
         calBody.appendChild(group);
@@ -1510,6 +1549,86 @@
 
     calRefresh.addEventListener('click', fetchCalendar);
     fetchCalendar();
+
+    // ── Calendar Event Actions ──
+
+    async function deleteCalendarEvent(eventId, cardEl) {
+      cardEl.style.opacity = '0.4';
+      cardEl.style.pointerEvents = 'none';
+      try {
+        const res = await fetch(`/api/calendar/${encodeURIComponent(eventId)}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.ok) {
+          cardEl.style.transition = 'all 0.2s ease';
+          cardEl.style.maxHeight = cardEl.offsetHeight + 'px';
+          requestAnimationFrame(() => {
+            cardEl.style.maxHeight = '0';
+            cardEl.style.opacity = '0';
+            cardEl.style.marginBottom = '0';
+            cardEl.style.padding = '0';
+            cardEl.style.overflow = 'hidden';
+          });
+          setTimeout(fetchCalendar, 300);
+        } else {
+          cardEl.style.opacity = '1';
+          cardEl.style.pointerEvents = '';
+        }
+      } catch {
+        cardEl.style.opacity = '1';
+        cardEl.style.pointerEvents = '';
+      }
+    }
+
+    function startEditEvent(evt, titleEl) {
+      if (titleEl.contentEditable === 'true') return;
+      const original = titleEl.textContent;
+      titleEl.contentEditable = 'true';
+      titleEl.focus();
+
+      const range = document.createRange();
+      range.selectNodeContents(titleEl);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+
+      let done = false;
+      const finish = async (shouldSave) => {
+        if (done) return;
+        done = true;
+        titleEl.contentEditable = 'false';
+
+        const newTitle = titleEl.textContent.trim();
+        if (!shouldSave || !newTitle || newTitle === original) {
+          titleEl.textContent = original;
+          return;
+        }
+
+        titleEl.style.opacity = '0.5';
+        try {
+          const res = await fetch(`/api/calendar/${encodeURIComponent(evt.id)}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ summary: newTitle }),
+          });
+          const data = await res.json();
+          if (data.ok) {
+            titleEl.textContent = data.event.title;
+          } else {
+            titleEl.textContent = original;
+          }
+        } catch {
+          titleEl.textContent = original;
+        } finally {
+          titleEl.style.opacity = '1';
+        }
+      };
+
+      titleEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+        if (e.key === 'Escape') finish(false);
+      }, { once: false });
+      titleEl.addEventListener('blur', () => finish(true), { once: true });
+    }
 
     // ── Calendar Quick Add ──
 
