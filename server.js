@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
