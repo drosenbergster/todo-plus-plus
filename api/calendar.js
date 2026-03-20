@@ -1,16 +1,14 @@
-import { getCalendar } from './_gcal.js';
+import { calFetch } from './_gcal.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ ok: false, message: 'Method not allowed' });
 
   try {
-    const cal = getCalendar();
     const now = new Date();
     const weekLater = new Date(now);
     weekLater.setDate(weekLater.getDate() + 7);
 
-    const { data } = await cal.events.list({
-      calendarId: 'primary',
+    const params = new URLSearchParams({
       timeMin: now.toISOString(),
       timeMax: weekLater.toISOString(),
       singleEvents: true,
@@ -18,6 +16,7 @@ export default async function handler(req, res) {
       maxResults: 50,
     });
 
+    const data = await calFetch(`/calendars/primary/events?${params}`);
     const events = (data.items ?? []).map(evt => ({
       id: evt.id,
       title: evt.summary ?? '(No title)',

@@ -1,12 +1,11 @@
-import { getCalendar } from '../_gcal.js';
+import { calFetch } from '../_gcal.js';
 
 export default async function handler(req, res) {
   const { eventId } = req.query;
-  const cal = getCalendar();
 
   if (req.method === 'DELETE') {
     try {
-      await cal.events.delete({ calendarId: 'primary', eventId });
+      await calFetch(`/calendars/primary/events/${encodeURIComponent(eventId)}`, { method: 'DELETE' });
       res.json({ ok: true });
     } catch (err) {
       console.error('[calendar/delete]', err.message);
@@ -18,15 +17,14 @@ export default async function handler(req, res) {
   if (req.method === 'PATCH') {
     try {
       const { summary, start, end } = req.body;
-      const requestBody = {};
-      if (summary !== undefined) requestBody.summary = summary;
-      if (start !== undefined) requestBody.start = start;
-      if (end !== undefined) requestBody.end = end;
+      const body = {};
+      if (summary !== undefined) body.summary = summary;
+      if (start !== undefined) body.start = start;
+      if (end !== undefined) body.end = end;
 
-      const { data } = await cal.events.patch({
-        calendarId: 'primary',
-        eventId,
-        requestBody,
+      const data = await calFetch(`/calendars/primary/events/${encodeURIComponent(eventId)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
       });
 
       res.json({

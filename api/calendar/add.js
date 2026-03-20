@@ -1,4 +1,4 @@
-import { getCalendar } from '../_gcal.js';
+import { calFetch } from '../_gcal.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, message: 'Method not allowed' });
@@ -8,11 +8,8 @@ export default async function handler(req, res) {
     if (!text || typeof text !== 'string' || !text.trim())
       return res.status(400).json({ ok: false, error: 'missing_text', message: 'Event text is required.' });
 
-    const cal = getCalendar();
-    const { data } = await cal.events.quickAdd({
-      calendarId: 'primary',
-      text: text.trim(),
-    });
+    const params = new URLSearchParams({ text: text.trim() });
+    const data = await calFetch(`/calendars/primary/events/quickAdd?${params}`, { method: 'POST' });
 
     res.json({
       ok: true,

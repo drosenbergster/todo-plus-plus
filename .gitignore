@@ -4,3 +4,5 @@ dist
 .env
 client_secret*.json
 download.html
+.vercel
+.env*.local
