@@ -375,6 +375,73 @@
     .subtask-delete:hover { color: var(--danger); background: var(--danger-bg); }
     .subtask-delete svg { width: 14px; height: 14px; }
 
+    /* ── Subtask expand/collapse ── */
+    .subtask-expand-caret {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; min-width: 16px; cursor: pointer;
+      color: var(--text-muted); transition: transform 0.2s ease, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .subtask-expand-caret:hover { color: var(--text); }
+    .subtask-expand-caret svg { width: 12px; height: 12px; }
+    .subtask-expand-caret.open { transform: rotate(90deg); }
+
+    /* ── Sub-subtask Panel ── */
+    .sub-subtask-panel {
+      display: none; padding: 0.125rem 0 0.25rem;
+      padding-left: calc(18px + 16px + 0.5rem);
+    }
+    .subtask-item.sub-expanded .sub-subtask-panel { display: block; }
+
+    .sub-subtask-list {
+      list-style: none; display: flex; flex-direction: column;
+      gap: 0.0625rem; margin-bottom: 0.25rem;
+    }
+
+    .sub-subtask-item { border-radius: 6px; transition: background 0.15s ease; }
+    .sub-subtask-item:hover { background: var(--accent-light); }
+
+    .sub-subtask-row {
+      display: flex; align-items: center; gap: 0.375rem;
+      padding: 0.25rem 0.375rem;
+    }
+
+    .sub-subtask-item .task-check { width: 16px; height: 16px; min-width: 16px; }
+    .sub-subtask-item .task-check .checkmark { width: 16px; height: 16px; border-radius: 4px; }
+    .sub-subtask-item .task-check .checkmark svg { width: 9px; height: 9px; }
+
+    .sub-subtask-text {
+      flex: 1; font-size: 0.8125rem; word-break: break-word;
+      padding: 0.0625rem 0; cursor: text; color: var(--text);
+    }
+    .sub-subtask-item.done .sub-subtask-text {
+      text-decoration: line-through; color: var(--text-muted);
+    }
+
+    .sub-subtask-item .subtask-delete { width: 20px; height: 20px; min-width: 20px; }
+    .sub-subtask-item .subtask-delete svg { width: 12px; height: 12px; }
+    .sub-subtask-item:hover .subtask-delete { opacity: 1; }
+
+    .sub-subtask-notes {
+      padding: 0.125rem 0 0.25rem;
+      padding-left: calc(16px + 0.375rem);
+    }
+    .sub-subtask-notes textarea {
+      width: 100%; min-height: 1.75rem; padding: 0.25rem 0.375rem;
+      font-family: inherit; font-size: 0.75rem; color: var(--text);
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 5px; outline: none; resize: vertical;
+      line-height: 1.5; transition: border-color 0.2s ease;
+    }
+    .sub-subtask-notes textarea::placeholder { color: var(--text-muted); opacity: 0.5; }
+    .sub-subtask-notes textarea:focus { border-color: var(--accent); }
+    .sub-subtask-notes .inline-notes-display {
+      font-size: 0.75rem; padding: 0.25rem 0.375rem; border-radius: 5px;
+    }
+
+    .sub-subtask-item .note-btn { width: 20px; height: 20px; min-width: 20px; }
+    .sub-subtask-item .note-btn svg { width: 11px; height: 11px; }
+
     /* ── Add Subtask ── */
     .add-subtask-form { margin-bottom: 0.5rem; }
     .add-subtask-form input {
@@ -385,6 +452,16 @@
     }
     .add-subtask-form input::placeholder { color: var(--text-muted); opacity: 0.6; }
     .add-subtask-form input:focus { border-color: var(--accent); border-style: solid; }
+
+    .add-sub-subtask-form { margin-bottom: 0.25rem; }
+    .add-sub-subtask-form input {
+      width: 100%; padding: 0.375rem 0.5rem;
+      font-family: inherit; font-size: 0.8125rem; color: var(--text);
+      background: transparent; border: 1.5px dashed var(--border);
+      border-radius: 6px; outline: none; transition: border-color 0.2s ease;
+    }
+    .add-sub-subtask-form input::placeholder { color: var(--text-muted); opacity: 0.5; }
+    .add-sub-subtask-form input:focus { border-color: var(--accent); border-style: solid; }
 
     /* ── Task Actions (in expanded panel) ── */
     .task-actions {
@@ -443,10 +520,29 @@
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 0.625rem; padding: 0 0.25rem;
     }
+    .calendar-header-left {
+      display: flex; align-items: center; gap: 0.375rem; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; user-select: none;
+    }
+    .calendar-header-left:hover h2 { color: var(--text); }
     .calendar-header h2 {
       font-size: 0.875rem; font-weight: 600; text-transform: uppercase;
       letter-spacing: 0.06em; color: var(--text-muted);
+      transition: color 0.15s;
     }
+    .cal-caret {
+      display: inline-flex; width: 16px; height: 16px; color: var(--text-muted);
+      transition: transform 0.25s ease, color 0.15s;
+    }
+    .calendar-section.collapsed .cal-caret { transform: rotate(-90deg); }
+    .calendar-header-left:hover .cal-caret { color: var(--text); }
+    .cal-collapsible {
+      overflow: hidden; transition: grid-template-rows 0.3s ease;
+      display: grid; grid-template-rows: 1fr;
+    }
+    .cal-collapsible > div { overflow: hidden; }
+    .calendar-section.collapsed .cal-collapsible { grid-template-rows: 0fr; }
+    .calendar-section.collapsed .calendar-header { margin-bottom: 0; }
     .calendar-refresh {
       background: none; border: none; cursor: pointer;
       color: var(--text-muted); padding: 4px; border-radius: 6px;
@@ -655,7 +751,10 @@
 
     <div class="calendar-section hidden" id="calendarSection">
       <div class="calendar-header">
-        <h2>This Week</h2>
+        <div class="calendar-header-left" id="calToggle">
+          <svg class="cal-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          <h2>Upcoming Week</h2>
+        </div>
         <button class="calendar-refresh" id="calRefresh" aria-label="Refresh calendar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
@@ -663,12 +762,14 @@
           </svg>
         </button>
       </div>
-      <form class="cal-add-form" id="calAddForm">
-        <input type="text" id="calAddInput" placeholder="Add to calendar... (e.g. Lunch Tuesday 12pm)" autocomplete="off">
-        <button type="submit" class="cal-add-btn" id="calAddBtn">Add</button>
-      </form>
-      <div class="cal-add-feedback" id="calAddFeedback"></div>
-      <div id="calendarBody"></div>
+      <div class="cal-collapsible"><div>
+        <form class="cal-add-form" id="calAddForm">
+          <input type="text" id="calAddInput" placeholder="Add to calendar... (e.g. Lunch Tuesday 12pm)" autocomplete="off">
+          <button type="submit" class="cal-add-btn" id="calAddBtn">Add</button>
+        </form>
+        <div class="cal-add-feedback" id="calAddFeedback"></div>
+        <div id="calendarBody"></div>
+      </div></div>
     </div>
   </div>
 
@@ -683,9 +784,16 @@
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let tasks = JSON.parse(localStorage.getItem('todo-pp-tasks') || '[]');
+    function migrateSubtasks(subs) {
+      return (subs || []).map(s => ({
+        ...s,
+        notes: s.notes || '',
+        subtasks: migrateSubtasks(s.subtasks),
+      }));
+    }
     tasks = tasks.map(t => ({
       ...t,
-      subtasks: (t.subtasks || []).map(s => ({ ...s, notes: s.notes || '' })),
+      subtasks: migrateSubtasks(t.subtasks),
       starred: t.starred || false,
       notes: t.notes || '',
     }));
@@ -735,7 +843,7 @@
         done: r.done,
         starred: r.starred,
         notes: r.notes || '',
-        subtasks: (r.subtasks || []).map(s => ({ ...s, notes: s.notes || '' })),
+        subtasks: migrateSubtasks(r.subtasks),
       };
     }
 
@@ -1119,7 +1227,7 @@
         e.preventDefault();
         const text = subInput.value.trim();
         if (!text) return;
-        task.subtasks.push({ id: genId(), text, done: false, notes: '' });
+        task.subtasks.push({ id: genId(), text, done: false, notes: '', subtasks: [] });
         save();
         expanded.add(task.id);
         render();
@@ -1150,12 +1258,25 @@
       return li;
     }
 
+    const subExpanded = new Set();
+
     function createSubtaskEl(task, sub) {
       const li = document.createElement('li');
       li.className = 'subtask-item' + (sub.done ? ' done' : '');
+      if (subExpanded.has(sub.id)) li.classList.add('sub-expanded');
 
       const row = document.createElement('div');
       row.className = 'subtask-row';
+
+      const hasChildren = sub.subtasks && sub.subtasks.length > 0;
+      const caret = document.createElement('span');
+      caret.className = 'subtask-expand-caret' + (subExpanded.has(sub.id) ? ' open' : '');
+      caret.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>`;
+      if (!hasChildren && !subExpanded.has(sub.id)) caret.style.opacity = '0.3';
+      caret.addEventListener('click', () => {
+        subExpanded.has(sub.id) ? subExpanded.delete(sub.id) : subExpanded.add(sub.id);
+        render();
+      });
 
       const check = makeCheckbox(sub.done, 'Toggle step');
       check.querySelector('input').addEventListener('change', () => {
@@ -1168,6 +1289,9 @@
       text.className = 'subtask-text';
       text.textContent = sub.text;
       text.addEventListener('click', () => startEditSubtask(sub, text));
+
+      const subSubDone = (sub.subtasks || []).filter(ss => ss.done).length;
+      const subSubTotal = (sub.subtasks || []).length;
 
       const noteBtn = document.createElement('button');
       noteBtn.className = 'note-btn' + (sub.notes ? ' has-notes' : '');
@@ -1189,14 +1313,131 @@
         render();
       });
 
+      row.appendChild(caret);
       row.appendChild(check);
       row.appendChild(text);
+      if (subSubTotal > 0) {
+        const prog = document.createElement('span');
+        prog.className = 'subtask-progress';
+        prog.textContent = `${subSubDone}/${subSubTotal}`;
+        prog.addEventListener('click', () => {
+          subExpanded.has(sub.id) ? subExpanded.delete(sub.id) : subExpanded.add(sub.id);
+          render();
+        });
+        row.appendChild(prog);
+      }
       row.appendChild(noteBtn);
       row.appendChild(del);
       li.appendChild(row);
 
       if (sub.notes || notesOpen.has(sub.id)) {
         li.appendChild(buildNotesArea(sub, 'subtask-notes'));
+      }
+
+      const subPanel = document.createElement('div');
+      subPanel.className = 'sub-subtask-panel';
+
+      if (subSubTotal > 0) {
+        const ssList = document.createElement('ul');
+        ssList.className = 'sub-subtask-list';
+        sub.subtasks.forEach(ss => {
+          ssList.appendChild(createSubSubtaskEl(sub, ss));
+        });
+        subPanel.appendChild(ssList);
+      }
+
+      const ssForm = document.createElement('form');
+      ssForm.className = 'add-sub-subtask-form';
+      const ssInput = document.createElement('input');
+      ssInput.type = 'text';
+      ssInput.placeholder = 'Add a sub-step...';
+      ssInput.autocomplete = 'off';
+      ssForm.appendChild(ssInput);
+      ssForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const t = ssInput.value.trim();
+        if (!t) return;
+        if (!sub.subtasks) sub.subtasks = [];
+        sub.subtasks.push({ id: genId(), text: t, done: false, notes: '', subtasks: [] });
+        save();
+        subExpanded.add(sub.id);
+        caret.style.visibility = 'visible';
+        render();
+      });
+      subPanel.appendChild(ssForm);
+      li.appendChild(subPanel);
+
+      return li;
+    }
+
+    function createSubSubtaskEl(parentSub, ss) {
+      const li = document.createElement('li');
+      li.className = 'sub-subtask-item' + (ss.done ? ' done' : '');
+
+      const row = document.createElement('div');
+      row.className = 'sub-subtask-row';
+
+      const check = makeCheckbox(ss.done, 'Toggle sub-step');
+      check.querySelector('input').addEventListener('change', () => {
+        ss.done = !ss.done;
+        save();
+        render();
+      });
+
+      const text = document.createElement('span');
+      text.className = 'sub-subtask-text';
+      text.textContent = ss.text;
+      text.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.className = 'edit-input';
+        input.style.fontSize = '0.8125rem';
+        input.value = ss.text;
+        text.replaceWith(input);
+        input.focus();
+        input.select();
+        let done = false;
+        const finish = (shouldSave) => {
+          if (done) return;
+          done = true;
+          if (shouldSave) { const v = input.value.trim(); if (v) ss.text = v; }
+          save();
+          render();
+        };
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+          if (e.key === 'Escape') finish(false);
+        });
+        input.addEventListener('blur', () => finish(true));
+      });
+
+      const noteBtn = document.createElement('button');
+      noteBtn.className = 'note-btn' + (ss.notes ? ' has-notes' : '');
+      noteBtn.setAttribute('aria-label', 'Toggle notes');
+      noteBtn.innerHTML = PENCIL_SVG;
+      noteBtn.addEventListener('click', () => {
+        notesOpen.add(ss.id);
+        render();
+      });
+
+      const del = document.createElement('button');
+      del.className = 'subtask-delete';
+      del.setAttribute('aria-label', 'Delete sub-step');
+      del.innerHTML = X_SVG;
+      del.addEventListener('click', () => {
+        parentSub.subtasks = parentSub.subtasks.filter(s => s.id !== ss.id);
+        notesOpen.delete(ss.id);
+        save();
+        render();
+      });
+
+      row.appendChild(check);
+      row.appendChild(text);
+      row.appendChild(noteBtn);
+      row.appendChild(del);
+      li.appendChild(row);
+
+      if (ss.notes || notesOpen.has(ss.id)) {
+        li.appendChild(buildNotesArea(ss, 'sub-subtask-notes'));
       }
 
       return li;
@@ -1418,6 +1659,13 @@
     const calSection = document.getElementById('calendarSection');
     const calBody = document.getElementById('calendarBody');
     const calRefresh = document.getElementById('calRefresh');
+    const calToggle = document.getElementById('calToggle');
+
+    if (localStorage.getItem('cal-collapsed') === '1') calSection.classList.add('collapsed');
+    calToggle.addEventListener('click', () => {
+      calSection.classList.toggle('collapsed');
+      localStorage.setItem('cal-collapsed', calSection.classList.contains('collapsed') ? '1' : '0');
+    });
 
     function formatTime(isoStr) {
       const d = new Date(isoStr);
