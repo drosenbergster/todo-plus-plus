@@ -442,26 +442,50 @@
     .sub-subtask-item .note-btn { width: 20px; height: 20px; min-width: 20px; }
     .sub-subtask-item .note-btn svg { width: 11px; height: 11px; }
 
-    /* ── Add Subtask ── */
-    .add-subtask-form { margin-bottom: 0.5rem; }
-    .add-subtask-form input {
-      width: 100%; padding: 0.5rem 0.625rem;
-      font-family: inherit; font-size: 0.875rem; color: var(--text);
-      background: transparent; border: 1.5px dashed var(--border);
-      border-radius: 8px; outline: none; transition: border-color 0.2s ease;
+    /* ── Add Subtask (inline +) ── */
+    .add-subtask-trigger {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 6px;
+      background: none; border: 1.5px solid var(--border);
+      color: var(--text-muted); cursor: pointer;
+      font-size: 1rem; line-height: 1; padding: 0;
+      transition: all 0.15s ease; margin: 0.25rem 0 0.5rem;
+      opacity: 0.5;
     }
-    .add-subtask-form input::placeholder { color: var(--text-muted); opacity: 0.6; }
-    .add-subtask-form input:focus { border-color: var(--accent); border-style: solid; }
+    .add-subtask-trigger:hover { opacity: 1; border-color: var(--accent); color: var(--accent); }
+    .add-subtask-trigger svg { width: 12px; height: 12px; }
 
-    .add-sub-subtask-form { margin-bottom: 0.25rem; }
-    .add-sub-subtask-form input {
-      width: 100%; padding: 0.375rem 0.5rem;
-      font-family: inherit; font-size: 0.8125rem; color: var(--text);
-      background: transparent; border: 1.5px dashed var(--border);
-      border-radius: 6px; outline: none; transition: border-color 0.2s ease;
+    .add-subtask-inline { display: none; margin-bottom: 0.5rem; }
+    .add-subtask-inline.open { display: block; }
+    .add-subtask-inline input {
+      width: 100%; padding: 0.4rem 0.5rem;
+      font-family: inherit; font-size: 0.875rem; color: var(--text);
+      background: transparent; border: none; border-bottom: 1.5px solid var(--accent);
+      outline: none; border-radius: 0;
     }
-    .add-sub-subtask-form input::placeholder { color: var(--text-muted); opacity: 0.5; }
-    .add-sub-subtask-form input:focus { border-color: var(--accent); border-style: solid; }
+    .add-subtask-inline input::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+    .add-sub-subtask-trigger {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 5px;
+      background: none; border: 1.5px solid var(--border);
+      color: var(--text-muted); cursor: pointer;
+      font-size: 0.875rem; line-height: 1; padding: 0;
+      transition: all 0.15s ease; margin: 0.125rem 0 0.25rem;
+      opacity: 0.4;
+    }
+    .add-sub-subtask-trigger:hover { opacity: 1; border-color: var(--accent); color: var(--accent); }
+    .add-sub-subtask-trigger svg { width: 10px; height: 10px; }
+
+    .add-sub-subtask-inline { display: none; margin-bottom: 0.25rem; }
+    .add-sub-subtask-inline.open { display: block; }
+    .add-sub-subtask-inline input {
+      width: 100%; padding: 0.3rem 0.4rem;
+      font-family: inherit; font-size: 0.8125rem; color: var(--text);
+      background: transparent; border: none; border-bottom: 1.5px solid var(--accent);
+      outline: none; border-radius: 0;
+    }
+    .add-sub-subtask-inline input::placeholder { color: var(--text-muted); opacity: 0.5; }
 
     /* ── Task Actions (in expanded panel) ── */
     .task-actions {
@@ -709,6 +733,38 @@
     @media (max-width: 480px) {
       .schedule-panel { padding-left: calc(0.75rem + 30px); }
     }
+
+    /* ── Otter Strikethrough Animation ── */
+    .otter-striking {
+      position: relative;
+      display: inline-block;
+      overflow: visible;
+    }
+    .otter-strike-line {
+      position: absolute; top: 50%; left: 0;
+      height: 2px; background: var(--text-muted);
+      transform: translateY(-50%); border-radius: 1px;
+      animation: otter-line-grow 0.55s ease-in-out forwards;
+      pointer-events: none; z-index: 1;
+    }
+    .otter-strike-emoji {
+      position: absolute; top: 50%;
+      font-size: 0.85em; line-height: 1;
+      pointer-events: none; z-index: 2;
+      animation: otter-swim 0.55s ease-in-out forwards;
+    }
+    @keyframes otter-line-grow {
+      0% { width: 0; }
+      100% { width: 100%; }
+    }
+    @keyframes otter-swim {
+      0%   { left: -1.2em; transform: translateY(-50%) rotate(0deg) scaleX(-1); }
+      20%  { transform: translateY(-60%) rotate(-10deg) scaleX(-1); }
+      40%  { transform: translateY(-40%) rotate(8deg) scaleX(-1); }
+      60%  { transform: translateY(-60%) rotate(-6deg) scaleX(-1); }
+      80%  { transform: translateY(-45%) rotate(4deg) scaleX(-1); }
+      100% { left: calc(100% + 0.3em); transform: translateY(-50%) rotate(0deg) scaleX(-1); }
+    }
   </style>
 </head>
 <body>
@@ -777,6 +833,7 @@
     const PENCIL_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;
     const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
     const GRIP_SVG = `<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="3" r="1.5"/><circle cx="11" cy="3" r="1.5"/><circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>`;
+    const PLUS_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
 
     // ── Supabase ──
     const SUPABASE_URL = 'https://crelhylvlimbkbyvzfce.supabase.co';
@@ -923,15 +980,14 @@
         return;
       }
 
-      listHeader.style.display = '';
       emptyState.style.display = 'none';
 
       if (doneCount > 0) {
-        taskCount.textContent = `${total - doneCount} remaining · ${doneCount} done`;
+        listHeader.style.display = '';
+        taskCount.textContent = '';
         clearBtn.style.display = '';
       } else {
-        taskCount.textContent = `${total} task${total === 1 ? '' : 's'}`;
-        clearBtn.style.display = 'none';
+        listHeader.style.display = 'none';
       }
     }
 
@@ -984,6 +1040,30 @@
       }
 
       return wrap;
+    }
+
+    // ── Otter Strikethrough ──
+
+    function playOtterStrike(textEl, onDone) {
+      if (!textEl || textEl.closest('.otter-striking')) { onDone(); return; }
+      textEl.classList.add('otter-striking');
+
+      const line = document.createElement('span');
+      line.className = 'otter-strike-line';
+
+      const otter = document.createElement('span');
+      otter.className = 'otter-strike-emoji';
+      otter.textContent = '🦦';
+
+      textEl.appendChild(line);
+      textEl.appendChild(otter);
+
+      otter.addEventListener('animationend', () => {
+        line.remove();
+        otter.remove();
+        textEl.classList.remove('otter-striking');
+        onDone();
+      }, { once: true });
     }
 
     // ── Drag & Drop ──
@@ -1126,10 +1206,19 @@
 
       const check = makeCheckbox(task.done, 'Toggle complete');
       check.querySelector('input').addEventListener('change', () => {
-        task.done = !task.done;
-        if (task.done) task.starred = false;
-        save();
-        setTimeout(render, 150);
+        if (!task.done) {
+          const textEl = li.querySelector('.task-text');
+          playOtterStrike(textEl, () => {
+            task.done = true;
+            task.starred = false;
+            save();
+            render();
+          });
+        } else {
+          task.done = false;
+          save();
+          render();
+        }
       });
 
       const content = document.createElement('div');
@@ -1215,15 +1304,33 @@
         panel.appendChild(subList);
       }
 
-      const subForm = document.createElement('form');
-      subForm.className = 'add-subtask-form';
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-subtask-trigger';
+      addBtn.type = 'button';
+      addBtn.innerHTML = PLUS_SVG;
+
+      const addWrap = document.createElement('form');
+      addWrap.className = 'add-subtask-inline';
       const subInput = document.createElement('input');
       subInput.type = 'text';
       subInput.placeholder = 'Add a step...';
       subInput.autocomplete = 'off';
-      subForm.appendChild(subInput);
+      addWrap.appendChild(subInput);
 
-      subForm.addEventListener('submit', (e) => {
+      addBtn.addEventListener('click', () => {
+        addWrap.classList.add('open');
+        addBtn.style.display = 'none';
+        subInput.focus();
+      });
+
+      subInput.addEventListener('blur', () => {
+        if (!subInput.value.trim()) {
+          addWrap.classList.remove('open');
+          addBtn.style.display = '';
+        }
+      });
+
+      addWrap.addEventListener('submit', (e) => {
         e.preventDefault();
         const text = subInput.value.trim();
         if (!text) return;
@@ -1231,11 +1338,14 @@
         save();
         expanded.add(task.id);
         render();
-        const newInput = taskList.querySelector(`[data-id="${task.id}"] .add-subtask-form input`);
-        if (newInput) newInput.focus();
+        requestAnimationFrame(() => {
+          const newBtn = taskList.querySelector(`[data-id="${task.id}"] .add-subtask-trigger`);
+          if (newBtn) newBtn.click();
+        });
       });
 
-      panel.appendChild(subForm);
+      panel.appendChild(addBtn);
+      panel.appendChild(addWrap);
 
       const actions = document.createElement('div');
       actions.className = 'task-actions';
@@ -1280,9 +1390,18 @@
 
       const check = makeCheckbox(sub.done, 'Toggle step');
       check.querySelector('input').addEventListener('change', () => {
-        sub.done = !sub.done;
-        save();
-        render();
+        if (!sub.done) {
+          const textEl = li.querySelector('.subtask-text');
+          playOtterStrike(textEl, () => {
+            sub.done = true;
+            save();
+            render();
+          });
+        } else {
+          sub.done = false;
+          save();
+          render();
+        }
       });
 
       const text = document.createElement('span');
@@ -1346,14 +1465,33 @@
         subPanel.appendChild(ssList);
       }
 
-      const ssForm = document.createElement('form');
-      ssForm.className = 'add-sub-subtask-form';
+      const ssAddBtn = document.createElement('button');
+      ssAddBtn.className = 'add-sub-subtask-trigger';
+      ssAddBtn.type = 'button';
+      ssAddBtn.innerHTML = PLUS_SVG;
+
+      const ssAddWrap = document.createElement('form');
+      ssAddWrap.className = 'add-sub-subtask-inline';
       const ssInput = document.createElement('input');
       ssInput.type = 'text';
       ssInput.placeholder = 'Add a sub-step...';
       ssInput.autocomplete = 'off';
-      ssForm.appendChild(ssInput);
-      ssForm.addEventListener('submit', (e) => {
+      ssAddWrap.appendChild(ssInput);
+
+      ssAddBtn.addEventListener('click', () => {
+        ssAddWrap.classList.add('open');
+        ssAddBtn.style.display = 'none';
+        ssInput.focus();
+      });
+
+      ssInput.addEventListener('blur', () => {
+        if (!ssInput.value.trim()) {
+          ssAddWrap.classList.remove('open');
+          ssAddBtn.style.display = '';
+        }
+      });
+
+      ssAddWrap.addEventListener('submit', (e) => {
         e.preventDefault();
         const t = ssInput.value.trim();
         if (!t) return;
@@ -1361,10 +1499,11 @@
         sub.subtasks.push({ id: genId(), text: t, done: false, notes: '', subtasks: [] });
         save();
         subExpanded.add(sub.id);
-        caret.style.visibility = 'visible';
         render();
       });
-      subPanel.appendChild(ssForm);
+
+      subPanel.appendChild(ssAddBtn);
+      subPanel.appendChild(ssAddWrap);
       li.appendChild(subPanel);
 
       return li;
@@ -1379,9 +1518,18 @@
 
       const check = makeCheckbox(ss.done, 'Toggle sub-step');
       check.querySelector('input').addEventListener('change', () => {
-        ss.done = !ss.done;
-        save();
-        render();
+        if (!ss.done) {
+          const textEl = li.querySelector('.sub-subtask-text');
+          playOtterStrike(textEl, () => {
+            ss.done = true;
+            save();
+            render();
+          });
+        } else {
+          ss.done = false;
+          save();
+          render();
+        }
       });
 
       const text = document.createElement('span');
