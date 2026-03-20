@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     :root {
       --bg: #faf9f6;
@@ -560,6 +561,11 @@
     const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
     const GRIP_SVG = `<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="3" r="1.5"/><circle cx="11" cy="3" r="1.5"/><circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>`;
 
+    // ── Supabase ──
+    const SUPABASE_URL = 'https://crelhylvlimbkbyvzfce.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyZWxoeWx2bGltYmtieXZ6ZmNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NjYyMDQsImV4cCI6MjA4OTU0MjIwNH0.nxtPWsiG57eRf2dAqwMifk7_cPdUirixKyEevk9G64Y';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     let tasks = JSON.parse(localStorage.getItem('todo-pp-tasks') || '[]');
     tasks = tasks.map(t => ({
       ...t,
@@ -580,9 +586,84 @@
     const taskCount = $('#taskCount');
     const clearBtn = $('#clearBtn');
 
+    let syncTimer = null;
+
     function save() {
       localStorage.setItem('todo-pp-tasks', JSON.stringify(tasks));
+      debouncedSync();
     }
+
+    function debouncedSync() {
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(syncToSupabase, 400);
+    }
+
+    function taskToRow(t, idx) {
+      return {
+        id: t.id,
+        text: t.text,
+        done: t.done,
+        starred: t.starred,
+        notes: t.notes,
+        subtasks: t.subtasks,
+        position: idx,
+        updated_at: new Date().toISOString(),
+      };
+    }
+
+    function rowToTask(r) {
+      return {
+        id: r.id,
+        text: r.text,
+        done: r.done,
+        starred: r.starred,
+        notes: r.notes || '',
+        subtasks: (r.subtasks || []).map(s => ({ ...s, notes: s.notes || '' })),
+      };
+    }
+
+    async function syncToSupabase() {
+      try {
+        const rows = tasks.map((t, i) => taskToRow(t, i));
+        const localIds = tasks.map(t => t.id);
+
+        if (rows.length > 0) {
+          await sb.from('tasks').upsert(rows, { onConflict: 'id' });
+        }
+
+        const { data: remote } = await sb.from('tasks').select('id');
+        if (remote) {
+          const remoteOnly = remote.filter(r => !localIds.includes(r.id)).map(r => r.id);
+          if (remoteOnly.length > 0) {
+            await sb.from('tasks').delete().in('id', remoteOnly);
+          }
+        }
+      } catch (e) {
+        console.warn('[sync]', e.message);
+      }
+    }
+
+    async function loadFromSupabase() {
+      try {
+        const { data, error } = await sb.from('tasks')
+          .select('*')
+          .order('position', { ascending: true });
+
+        if (error) throw error;
+        if (!data || data.length === 0) {
+          if (tasks.length > 0) syncToSupabase();
+          return;
+        }
+
+        tasks = data.map(rowToTask);
+        localStorage.setItem('todo-pp-tasks', JSON.stringify(tasks));
+        render();
+      } catch (e) {
+        console.warn('[load]', e.message);
+      }
+    }
+
+    loadFromSupabase();
 
     function genId() {
       return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
