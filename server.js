@@ -7,6 +7,7 @@ import os from 'os';
 
 const execFileAsync = promisify(execFile);
 const app = express();
+app.use(express.json());
 const PORT = 3001;
 
 const gwsBin = path.join(os.homedir(), '.npm-global', 'bin', 'gws');
@@ -61,6 +62,42 @@ app.get('/api/calendar', async (_req, res) => {
       return res.json({ ok: false, error: 'not_authenticated', message: 'Not authenticated. Run: gws auth setup && gws auth login -s calendar' });
 
     console.error('[calendar]', msg);
+    res.json({ ok: false, error: 'unknown', message: msg });
+  }
+});
+
+app.post('/api/calendar/add', async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || typeof text !== 'string' || !text.trim()) {
+      return res.status(400).json({ ok: false, error: 'missing_text', message: 'Event text is required.' });
+    }
+
+    const data = await runGws([
+      'calendar', 'events', 'quickAdd',
+      '--params', JSON.stringify({ calendarId: 'primary', text: text.trim() }),
+    ]);
+
+    res.json({
+      ok: true,
+      event: {
+        id: data.id,
+        title: data.summary ?? text.trim(),
+        start: data.start?.dateTime ?? data.start?.date ?? null,
+        end: data.end?.dateTime ?? data.end?.date ?? null,
+        htmlLink: data.htmlLink ?? null,
+      },
+    });
+  } catch (err) {
+    const msg = err.message ?? String(err);
+    console.error('[calendar/add]', msg);
+
+    if (msg.includes('ENOENT') || msg.includes('not found'))
+      return res.json({ ok: false, error: 'gws_not_installed', message: 'gws CLI not found.' });
+
+    if (msg.includes('auth') || msg.includes('credential') || msg.includes('token'))
+      return res.json({ ok: false, error: 'not_authenticated', message: 'Not authenticated with Google Calendar.' });
+
     res.json({ ok: false, error: 'unknown', message: msg });
   }
 });

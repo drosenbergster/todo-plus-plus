@@ -502,6 +502,98 @@
       font-size: 0.75rem; background: var(--bg); padding: 0.125rem 0.375rem;
       border-radius: 4px;
     }
+
+    /* ── Calendar Quick Add ── */
+    .cal-add-form {
+      display: flex; gap: 0.375rem; margin-bottom: 0.75rem;
+    }
+    .cal-add-form input {
+      flex: 1; padding: 0.5rem 0.75rem;
+      font-family: inherit; font-size: 0.8125rem; color: var(--text);
+      background: var(--bg-elevated); border: 1.5px solid var(--border);
+      border-radius: 10px; outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .cal-add-form input::placeholder { color: var(--text-muted); opacity: 0.6; }
+    .cal-add-form input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(45, 90, 74, 0.12);
+    }
+    [data-theme="dark"] .cal-add-form input:focus {
+      box-shadow: 0 0 0 3px rgba(92, 184, 148, 0.15);
+    }
+    .cal-add-btn {
+      padding: 0.5rem 0.75rem; font-family: inherit;
+      font-size: 0.75rem; font-weight: 600; color: var(--accent);
+      background: var(--accent-light); border: 1.5px solid var(--border);
+      border-radius: 10px; cursor: pointer;
+      transition: all 0.15s ease; white-space: nowrap;
+    }
+    .cal-add-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .cal-add-btn:disabled { opacity: 0.5; cursor: default; }
+    .cal-add-feedback {
+      font-size: 0.75rem; padding: 0.25rem 0.25rem 0;
+      min-height: 1.25rem;
+    }
+    .cal-add-feedback.success { color: var(--accent); }
+    .cal-add-feedback.error { color: var(--danger); }
+
+    /* ── Schedule Task Button ── */
+    .schedule-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; min-width: 30px;
+      background: none; border: none; cursor: pointer;
+      border-radius: 7px; transition: all 0.15s ease;
+      color: var(--border); -webkit-tap-highlight-color: transparent;
+    }
+    .schedule-btn:hover { color: var(--accent); background: var(--accent-light); }
+    .schedule-btn svg { width: 15px; height: 15px; }
+
+    /* ── Schedule Panel ── */
+    .schedule-panel {
+      display: none;
+      padding: 0.625rem 0.875rem 0.75rem;
+      padding-left: calc(0.875rem + 18px + 22px + 0.625rem + 0.625rem);
+      border-top: 1px solid var(--border);
+    }
+    .task-item.scheduling .schedule-panel { display: block; }
+    .schedule-panel-inner {
+      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    }
+    .schedule-panel label {
+      font-size: 0.75rem; font-weight: 500; color: var(--text-muted);
+    }
+    .schedule-panel input[type="date"],
+    .schedule-panel input[type="time"] {
+      padding: 0.375rem 0.5rem; font-family: inherit; font-size: 0.8125rem;
+      color: var(--text); background: var(--bg);
+      border: 1.5px solid var(--border); border-radius: 8px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .schedule-panel input:focus { border-color: var(--accent); }
+    .schedule-confirm {
+      padding: 0.375rem 0.75rem; font-family: inherit;
+      font-size: 0.75rem; font-weight: 600; color: #fff;
+      background: var(--accent); border: none; border-radius: 8px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .schedule-confirm:hover { background: var(--accent-hover); }
+    .schedule-confirm:disabled { opacity: 0.5; cursor: default; }
+    .schedule-cancel {
+      padding: 0.375rem 0.5rem; font-family: inherit;
+      font-size: 0.75rem; color: var(--text-muted);
+      background: none; border: none; cursor: pointer;
+      transition: color 0.15s;
+    }
+    .schedule-cancel:hover { color: var(--text); }
+    .schedule-feedback {
+      width: 100%; font-size: 0.75rem; margin-top: 0.25rem;
+    }
+    .schedule-feedback.success { color: var(--accent); }
+    .schedule-feedback.error { color: var(--danger); }
+    @media (max-width: 480px) {
+      .schedule-panel { padding-left: calc(0.75rem + 30px); }
+    }
   </style>
 </head>
 <body>
@@ -537,6 +629,11 @@
           </svg>
         </button>
       </div>
+      <form class="cal-add-form" id="calAddForm">
+        <input type="text" id="calAddInput" placeholder="Add to calendar... (e.g. Lunch Tuesday 12pm)" autocomplete="off">
+        <button type="submit" class="cal-add-btn" id="calAddBtn">Add</button>
+      </form>
+      <div class="cal-add-feedback" id="calAddFeedback"></div>
       <div id="calendarBody"></div>
     </div>
 
@@ -950,14 +1047,32 @@
         render();
       });
 
+      const schedBtn = document.createElement('button');
+      schedBtn.className = 'schedule-btn';
+      schedBtn.setAttribute('aria-label', 'Schedule to calendar');
+      schedBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+      schedBtn.addEventListener('click', () => {
+        if (scheduling.has(task.id)) scheduling.delete(task.id);
+        else scheduling.add(task.id);
+        render();
+      });
+
       row.appendChild(check);
       row.appendChild(content);
       row.appendChild(noteBtn);
-      if (!task.done) row.appendChild(starBtn);
+      if (!task.done) {
+        row.appendChild(schedBtn);
+        row.appendChild(starBtn);
+      }
       li.appendChild(row);
 
       if (task.notes || notesOpen.has(task.id)) {
         li.appendChild(buildNotesArea(task, 'inline-notes'));
+      }
+
+      if (scheduling.has(task.id)) {
+        li.classList.add('scheduling');
+        li.appendChild(buildSchedulePanel(task));
       }
 
       const panel = document.createElement('div');
@@ -1195,6 +1310,89 @@
 
     render();
 
+    // ── Schedule Panel Builder ──
+
+    function buildSchedulePanel(task) {
+      const panel = document.createElement('div');
+      panel.className = 'schedule-panel';
+
+      const inner = document.createElement('div');
+      inner.className = 'schedule-panel-inner';
+
+      const dateLabel = document.createElement('label');
+      dateLabel.textContent = 'Date';
+      const dateInput = document.createElement('input');
+      dateInput.type = 'date';
+      dateInput.value = getDefaultScheduleDate();
+
+      const timeLabel = document.createElement('label');
+      timeLabel.textContent = 'Time';
+      const timeInput = document.createElement('input');
+      timeInput.type = 'time';
+      timeInput.value = getDefaultScheduleTime();
+
+      const confirmBtn = document.createElement('button');
+      confirmBtn.className = 'schedule-confirm';
+      confirmBtn.textContent = 'Schedule';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'schedule-cancel';
+      cancelBtn.textContent = 'Cancel';
+
+      const feedback = document.createElement('div');
+      feedback.className = 'schedule-feedback';
+
+      cancelBtn.addEventListener('click', () => {
+        scheduling.delete(task.id);
+        render();
+      });
+
+      confirmBtn.addEventListener('click', async () => {
+        const date = dateInput.value;
+        const time = timeInput.value;
+        if (!date) { feedback.textContent = 'Pick a date.'; feedback.classList.add('error'); return; }
+
+        const eventText = formatScheduleText(task.text, date, time || '12:00');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Scheduling...';
+        feedback.textContent = '';
+        feedback.className = 'schedule-feedback';
+
+        try {
+          const data = await addCalendarEvent(eventText);
+          if (data.ok) {
+            feedback.textContent = `Scheduled!`;
+            feedback.classList.add('success');
+            scheduling.delete(task.id);
+            fetchCalendar();
+            setTimeout(render, 1200);
+          } else {
+            feedback.textContent = data.message || 'Could not schedule.';
+            feedback.classList.add('error');
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Schedule';
+          }
+        } catch {
+          feedback.textContent = 'Network error.';
+          feedback.classList.add('error');
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Schedule';
+        }
+      });
+
+      inner.appendChild(dateLabel);
+      inner.appendChild(dateInput);
+      inner.appendChild(timeLabel);
+      inner.appendChild(timeInput);
+      inner.appendChild(confirmBtn);
+      inner.appendChild(cancelBtn);
+      panel.appendChild(inner);
+      panel.appendChild(feedback);
+
+      panel.style.display = 'block';
+      return panel;
+    }
+
     // ── Calendar ──
 
     const calSection = document.getElementById('calendarSection');
@@ -1311,6 +1509,80 @@
 
     calRefresh.addEventListener('click', fetchCalendar);
     fetchCalendar();
+
+    // ── Calendar Quick Add ──
+
+    const calAddForm = document.getElementById('calAddForm');
+    const calAddInput = document.getElementById('calAddInput');
+    const calAddBtn = document.getElementById('calAddBtn');
+    const calAddFeedback = document.getElementById('calAddFeedback');
+
+    async function addCalendarEvent(text) {
+      const res = await fetch('/api/calendar/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      return res.json();
+    }
+
+    calAddForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = calAddInput.value.trim();
+      if (!text) return;
+
+      calAddBtn.disabled = true;
+      calAddFeedback.textContent = '';
+      calAddFeedback.className = 'cal-add-feedback';
+
+      try {
+        const data = await addCalendarEvent(text);
+        if (data.ok) {
+          calAddFeedback.textContent = `Added "${data.event.title}"`;
+          calAddFeedback.classList.add('success');
+          calAddInput.value = '';
+          fetchCalendar();
+        } else {
+          calAddFeedback.textContent = data.message || 'Could not add event.';
+          calAddFeedback.classList.add('error');
+        }
+      } catch {
+        calAddFeedback.textContent = 'Network error — is the server running?';
+        calAddFeedback.classList.add('error');
+      } finally {
+        calAddBtn.disabled = false;
+        setTimeout(() => { calAddFeedback.textContent = ''; }, 4000);
+      }
+    });
+
+    // ── Schedule Task to Calendar ──
+
+    const scheduling = new Set();
+
+    function getDefaultScheduleDate() {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      return d.toISOString().split('T')[0];
+    }
+
+    function getDefaultScheduleTime() {
+      const d = new Date();
+      const h = Math.min(d.getHours() + 1, 23);
+      return String(h).padStart(2, '0') + ':00';
+    }
+
+    function formatScheduleText(taskText, date, time) {
+      const d = new Date(date + 'T00:00:00');
+      const monthName = d.toLocaleDateString([], { month: 'long' });
+      const day = d.getDate();
+      const [hh, mm] = time.split(':');
+      let hour = parseInt(hh, 10);
+      const ampm = hour >= 12 ? 'pm' : 'am';
+      if (hour > 12) hour -= 12;
+      if (hour === 0) hour = 12;
+      const timeStr = mm === '00' ? `${hour}${ampm}` : `${hour}:${mm}${ampm}`;
+      return `${taskText} ${monthName} ${day} ${timeStr}`;
+    }
   </script>
 </body>
 </html>
