@@ -435,7 +435,7 @@
 
     /* ── Calendar Section ── */
     .calendar-section {
-      margin-bottom: 1.25rem;
+      margin-top: 1.5rem; margin-bottom: 1.25rem;
     }
     .calendar-section.hidden { display: none; }
 
@@ -619,6 +619,21 @@
       <button type="submit" class="add-btn"><span>Add</span></button>
     </form>
 
+    <div class="list-header" id="listHeader" style="display:none">
+      <div class="list-actions">
+        <span class="task-count" id="taskCount"></span>
+        <button class="clear-btn" id="clearBtn" style="display:none">Clear done</button>
+      </div>
+    </div>
+
+    <ul class="task-list" id="taskList"></ul>
+
+    <div class="empty-state" id="emptyState">
+      <span class="otter">🦦</span>
+      <p>All clear</p>
+      <p>What's on your mind?</p>
+    </div>
+
     <div class="calendar-section hidden" id="calendarSection">
       <div class="calendar-header">
         <h2>This Week</h2>
@@ -635,21 +650,6 @@
       </form>
       <div class="cal-add-feedback" id="calAddFeedback"></div>
       <div id="calendarBody"></div>
-    </div>
-
-    <div class="list-header" id="listHeader" style="display:none">
-      <div class="list-actions">
-        <span class="task-count" id="taskCount"></span>
-        <button class="clear-btn" id="clearBtn" style="display:none">Clear done</button>
-      </div>
-    </div>
-
-    <ul class="task-list" id="taskList"></ul>
-
-    <div class="empty-state" id="emptyState">
-      <span class="otter">🦦</span>
-      <p>All clear</p>
-      <p>What's on your mind?</p>
     </div>
   </div>
 
@@ -673,6 +673,7 @@
 
     const expanded = new Set();
     const notesOpen = new Set();
+    const scheduling = new Set();
 
     const $ = s => document.querySelector(s);
     const taskList = $('#taskList');
@@ -1556,8 +1557,6 @@
     });
 
     // ── Schedule Task to Calendar ──
-
-    const scheduling = new Set();
 
     function getDefaultScheduleDate() {
       const d = new Date();
